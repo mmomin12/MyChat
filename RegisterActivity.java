@@ -1,12 +1,16 @@
 package com.zaeem.mychat;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -30,22 +34,12 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputLayout nname;
     private TextInputLayout nemail;
     private TextInputLayout npassword;
-    private TextInputLayout nPhone;
+    private Button button;
 
+    private Toolbar mtoolbar;
 
-    @OnClick(R.id.Eegister_submit_bt)
-    public void submit(View v) {
-        nemail = (TextInputLayout) findViewById(R.id.Register_email_text);
-        String email = nemail.getEditText().getText().toString();
-        npassword = (TextInputLayout) findViewById(R.id.Register_password_text);
-        String password = npassword.getEditText().getText().toString();
-        nPhone = (TextInputLayout) findViewById(R.id.Register_Phone_text);
-        String phone = nPhone.getEditText().getText().toString();
-        nname = (TextInputLayout) findViewById(R.id.Register_name_text);
-        String name = nname.getEditText().getText().toString();
+    private ProgressDialog mregProgressDialog;
 
-        registeruser( email, password);
-    }
 
 
     @Override
@@ -56,17 +50,51 @@ public class RegisterActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        mtoolbar = (Toolbar) findViewById(R.id.Register_page_toolbar);
+        setSupportActionBar(mtoolbar);
+        getSupportActionBar().setTitle("Create Account");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        mregProgressDialog = new ProgressDialog(this);
+
+        nname = (TextInputLayout) findViewById(R.id.Register_name_text);
+        nemail = (TextInputLayout) findViewById(R.id.Register_email_text);
+        npassword = (TextInputLayout) findViewById(R.id.Register_password_text);
+        button = (Button) findViewById(R.id.Eegister_submit_bt);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String email = nemail.getEditText().getText().toString();
+                String password = npassword.getEditText().getText().toString();
+                String name = nname.getEditText().getText().toString();
+
+                if (!TextUtils.isEmpty(name) || !TextUtils.isEmpty(email)|| !TextUtils.isEmpty(password)) {
+                    mregProgressDialog.setTitle("Registering");
+                    mregProgressDialog.setMessage("Your Account is Creating. Please wait!");
+                    mregProgressDialog.setCanceledOnTouchOutside(false);
+                    mregProgressDialog.show();
+                    registeruser(name, email, password);
+                }
+            }
+        });
+
+
     }
 
 
-    private void registeruser(String email, String password) {
+    private void registeruser(String name, String email, String password) {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
+                    mregProgressDialog.dismiss();
                     Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
+                    finish();
                 } else {
+                    mregProgressDialog.hide();;
                     Toast.makeText(RegisterActivity.this, "Try again Please", Toast.LENGTH_LONG).show();
                 }
             }

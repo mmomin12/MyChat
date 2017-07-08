@@ -11,9 +11,15 @@ import butterknife.OnClick;
 
 public class StartActivity extends AppCompatActivity {
 
-    @OnClick(R.id.Start_create_account_bt)
+    @OnClick(R.id.StartActivity_create_account_bt)
     public void create_account(View v){
         Intent intent = new Intent(this,RegisterActivity.class);
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.StartActivity_Already_Account_bt)
+    public void Already_accoutn(View v){
+        Intent intent = new Intent(this,LoginActivity.class);
         startActivity(intent);
     }
 
